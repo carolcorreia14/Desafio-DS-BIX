@@ -32,22 +32,28 @@ problemas_ar %>%
 ## O modelo é melhor quando o AIC e BIC são menores
     
 #Plotar todos os dados
-modelo1 <- glm(class ~ .,data = treino, family = binomial()) 
+
+#Opção 1 que eu usei
+modelo1 <- glm(class ~ .,data = treino, family = binomial) 
+stepAIC(modelo1)
+summary(modelo1)
+##Se beta1(estimate) é positivo, contribui de forma positiva na probabilidade
+##Se for negativo, o aumento dessa variavel, diminui a probabilidade de apresentar problemas de ar
+
+#Opção 2
 modelo <- glm(class~. , data = treino, family = binomial) %>%
   stepAIC(trace = FALSE)
-  
-stepAIC(modelo1)
 summary(modelo)
   
 # Fazendo predições
-probabilidades <- modelo %>% predict(teste, type = "response")
+probabilidades <- modelo1 %>% predict(teste, type = "response")
 predicao_class <- ifelse(probabilidades > 0.5, "pos", "neg")
   
 # Acurácia do modelo
 mean(predicao_class == teste$class)
   
 # Modelo de regressão logística completa
-modelo_completo <- glm(class ~ ., data = treino, family = binomial)
+modelo_completo <- glm(class ~ ., data = treino, family = binomial) # Creio que por conta da quantidade de variáveis muito altas, travou meu R, mesmo assim desenvolvi o código
 coef(modelo_completo)
   
 #### Selecionar as variáveis que mais contribuem no modelo ####
@@ -77,34 +83,17 @@ class_observado2 <- teste$class
 mean(predicao_class == class_observado)
   
   
-  
 
+#### Usando amostra de teste para ver se o modelo é bom mesmo
   
-  # se beta1(estimate) é positivo, contribui de forma positiva na probabilidade
-  # se for negativo, o aumento dessa variavel, diminui a probabilidade de apresentar problemas de ar
+modelo1_teste <- glm(class ~ . ,data = treino, family = binomial()) # todas as variaveis(exceto cd_000) são siginificativas pelo p-valor < 0.05
+summary(modelo1_teste)
   
-  #será que uma variavel tem o mesmo peso que outra variavel
+pred.Teste <- predict(modelo1, teste, type = "response") #Vai dar a probabilidade de cada caminhão apresentar defeitos no sistema de ar
+teste$Prob_defeito <- pred.Teste
   
+# Tabela de Confusão
   
-  # Se usar todas as variaveis e tirar as que não foram significativas -> Entrada Forçada 
+teste[,c("class","Prob_defeito")]
   
-  odds <- exp(coef(modelo2))
-  IC_odds <- exp(confint(modelo2))
-  
-  round(cbind(odds, IC_odds), 3)
-  
-  #### Usando amostra de teste para ver se o modelo é bom mesmo
-  
-  modelo1_teste <- glm(class ~ . ,data = treino, family = binomial()) # todas as variaveis(exceto cd_000) são siginificativas pelo p-valor < 0.05
-  
-  summary(modelo1_teste)
-  
-  pred.Teste <- predict(modelo1, teste, type = "response") #Vai dar a probabilidade de cada caminhão apresentar defeitos no sistema de ar
-  teste$Prob_defeito <- pred.Teste
-  
-  
-  # Tabela de Confusão
-  
-  teste[,c("class","Prob_defeito")]
-  
-  table(teste$class,teste$Prob_defeito>0.5)
+table(teste$class,teste$Prob_defeito>0.5)
