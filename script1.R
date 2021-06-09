@@ -35,20 +35,24 @@ glimpse(anos_ant)
 ############ Transformando a variável "class" em fator e recodificando ############
 
 ### base de teste ####
-base2020$class <- ifelse(base2020$class=="pos",1,0)
-base2020$class <- as.factor(base2020$class)
-View(base2020)
+# Opção 1 substituindo pos "pos" por 1 e "neg" por 0
+#base2020$class <- ifelse(base2020$class=="pos",1,0)
+#base2020$class <- as.factor(base2020$class)
 
+#Opção 2 que eu irei utilizar
 levels(base2020$class) <- c("neg","pos")
 base2020$class <- relevel(base2020$class,"neg")
+View(base2020)
 
 ### base de treino ###
-anos_ant$class <- ifelse(anos_ant$class=="pos",1,0)
-anos_ant$class <- as.factor(anos_ant$class)
-View(anos_ant)
+# Opção 1 substituindo pos "pos" por 1 e "neg" por 0
+#anos_ant$class <- ifelse(anos_ant$class=="pos",1,0)
+#anos_ant$class <- as.factor(anos_ant$class)
 
+#Opção 2 que eu irei utilizar
 levels(anos_ant$class) <- c("neg","pos")
 anos_ant$class <- relevel(anos_ant$class,"neg")
+View(anos_ant)
 
 #### Transformando "na" em missing values ####
 base2020[base2020 == "na"] <- NA 
